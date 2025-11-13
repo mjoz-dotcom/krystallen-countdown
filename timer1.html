@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K R Y S T A L L E N Countdown</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Using a more modern, readable font */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Animated warm gradient background */
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-gradient-animated {
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #ff8c00, #ffc107);
+            background-size: 400% 400%;
+            animation: gradient-animation 20s ease infinite;
+            opacity: 0.8;
+        }
+
+        /* Neon box effect with specular highlight */
+        .neon-box {
+            --neon-color-1: rgba(255, 193, 7, 0.8);
+            --neon-color-2: rgba(255, 140, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease-in-out;
+            box-shadow: 
+                /* Inner glow */
+                inset 0 0 10px 0px var(--neon-color-1),
+                /* Outer soft glow */
+                0 0 15px 2px var(--neon-color-1),
+                /* Outer stronger glow */
+                0 0 35px 8px var(--neon-color-2),
+                /* White specular highlight for hyperrealism */
+                0 0 5px 1px rgba(255, 255, 255, 1);
+        }
+
+        /* Micro-interaction on hover/focus */
+        .neon-box:hover, .neon-box:focus-within {
+            transform: translateY(-5px) scale(1.03);
+            --neon-color-1: rgba(255, 203, 57, 1);
+            --neon-color-2: rgba(255, 165, 0, 0.8);
+            box-shadow: 
+                inset 0 0 15px 2px var(--neon-color-1),
+                0 0 25px 4px var(--neon-color-1),
+                0 0 55px 12px var(--neon-color-2),
+                0 0 8px 2px rgba(255, 255, 255, 1);
+        }
+
+        /* Confetti particle animation */
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-black text-white antialiased overflow-hidden">
+
+    <!-- Background Elements -->
+    <div class="absolute inset-0 bg-gradient-animated"></div>
+    <canvas id="particle-canvas" class="absolute inset-0 opacity-20 mix-blend-screen"></canvas>
+    
+    <!-- K R Y S T A L L E N Building SVG with filmic bloom -->
+    <svg id="k-r-y-s-t-a-l-l-e-n-svg" class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" style="opacity: 0.25; filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5)) brightness(1.2);">
+        <defs>
+            <linearGradient id="watercolor-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:rgba(255, 193, 7, 0.2)" />
+                <stop offset="100%" style="stop-color:rgba(255, 140, 0, 0.3)" />
+            </linearGradient>
+            <filter id="bloom">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+                <feComposite operator="in" in2="SourceGraphic"/>
+                <feComposite in="SourceGraphic" operator="over"/>
+            </filter>
+        </defs>
+        <g stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" fill="url(#watercolor-fill)" filter="url(#bloom)">
+            <path d="M400 50 L650 200 L600 500 L200 500 L150 200 Z" />
+            <path d="M400 50 L150 200" />
+            <path d="M400 50 L650 200" />
+            <path d="M400 50 L400 520" />
+            <path d="M150 200 L200 500" />
+            <path d="M650 200 L600 500" />
+            <path d="M250 250 L550 250 L400 520 Z" fill-opacity="0.3" />
+        </g>
+    </svg>
+
+    <!-- Main Content -->
+    <main class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-2 uppercase tracking-widest" style="text-shadow: 0 0 10px rgba(255,193,7,0.5);">K R Y S T A L L E N</h1>
+        <h2 class="text-xl md:text-2xl font-light mb-12 md:mb-16 uppercase tracking-wider text-amber-200">DAYS TO MOVE</h2>
+
+        <!-- Countdown Timer -->
+        <div id="countdown" aria-live="polite" aria-atomic="true" class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8">
+            <!-- Days -->
+            <div class="neon-box flex flex-col items-center justify-center p-4 rounded-xl w-36 h-36 md:w-48 md:h-48 backdrop-blur-sm bg-black/30">
+                <span id="days" class="text-5xl md:text-7xl font-bold text-amber-300">0</span>
+                <span class="text-sm md:text-base font-light uppercase tracking-widest mt-2 text-amber-100">Days</span>
+            </div>
+            <!-- Hours -->
+            <div class="neon-box flex flex-col items-center justify-center p-4 rounded-xl w-36 h-36 md:w-48 md:h-48 backdrop-blur-sm bg-black/30">
+                <span id="hours" class="text-5xl md:text-7xl font-bold text-amber-300">0</span>
+                <span class="text-sm md:text-base font-light uppercase tracking-widest mt-2 text-amber-100">Hours</span>
+            </div>
+            <!-- Minutes -->
+            <div class="neon-box flex flex-col items-center justify-center p-4 rounded-xl w-36 h-36 md:w-48 md:h-48 backdrop-blur-sm bg-black/30">
+                <span id="minutes" class="text-5xl md:text-7xl font-bold text-amber-300">0</span>
+                <span class="text-sm md:text-base font-light uppercase tracking-widest mt-2 text-amber-100">Minutes</span>
+            </div>
+        </div>
+        
+        <p id="completion-message" class="hidden mt-12 text-3xl font-bold text-amber-300 uppercase tracking-widest" style="text-shadow: 0 0 15px rgba(255,193,7,0.7);">WELCOME IN DENMARK</p>
+    </main>
+
+    <!-- Confetti Container -->
+    <div id="confetti-container" class="absolute inset-0 pointer-events-none z-20"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURATION ---
+            const END_DATE_STRING = '2026-02-16T00:00:00Z'; // Use ISO 8601 format for UTC
+            const endDateUTC = new Date(END_DATE_STRING);
+
+            // --- DOM ELEMENT REFERENCES ---
+            const daysEl = document.getElementById('days');
+            const hoursEl = document.getElementById('hours');
+            const minutesEl = document.getElementById('minutes');
+            const countdownEl = document.getElementById('countdown');
+            const completionMessageEl = document.getElementById('completion-message');
+            const krystallenSvg = document.getElementById('k-r-y-s-t-a-l-l-e-n-svg');
+
+            let animationFrameId;
+
+            /**
+             * Main update loop for the countdown.
+             * Calculates time remaining and calls the render function.
+             * Uses requestAnimationFrame for performance.
+             */
+            function tick() {
+                const now = new Date();
+                const remainingTime = endDateUTC.getTime() - now.getTime();
+
+                if (remainingTime > 0) {
+                    const totalSeconds = Math.floor(remainingTime / 1000);
+                    const totalMinutes = Math.floor(totalSeconds / 60);
+                    const totalHours = Math.floor(totalMinutes / 60);
+                    
+                    const days = Math.floor(totalHours / 24);
+                    const hours = totalHours % 24;
+                    const minutes = totalMinutes % 60;
+
+                    render(days, hours, minutes);
+                    animationFrameId = requestAnimationFrame(tick);
+                } else {
+                    // Countdown has finished
+                    render(0, 0, 0);
+                    countdownEl.classList.add('hidden');
+                    completionMessageEl.classList.remove('hidden');
+                    launchConfetti();
+                    // Stop the loop
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                    }
+                }
+            }
+
+            /**
+             * Renders the calculated time values into the DOM.
+             * @param {number} days - The remaining days.
+             * @param {number} hours - The remaining hours.
+             * @param {number} minutes - The remaining minutes.
+             */
+            function render(days, hours, minutes) {
+                // Pad with '0' if the number is less than 10 for consistent width
+                const format = (num) => String(num).padStart(2, '0');
+
+                if (daysEl.textContent !== String(days)) daysEl.textContent = String(days);
+                if (hoursEl.textContent !== format(hours)) hoursEl.textContent = format(hours);
+                if (minutesEl.textContent !== format(minutes)) minutesEl.textContent = format(minutes);
+            }
+            
+            // --- VISUAL EFFECTS ---
+
+            /**
+             * Parallax effect for the background SVG based on mouse movement.
+             */
+            function initializeParallax() {
+                window.addEventListener('mousemove', (e) => {
+                    const { clientWidth, clientHeight } = document.documentElement;
+                    const x = (e.clientX - clientWidth / 2) / clientWidth;
+                    const y = (e.clientY - clientHeight / 2) / clientHeight;
+
+                    // Apply a subtle translation transform
+                    krystallenSvg.style.transform = `translate(${-x * 20}px, ${-y * 15}px)`;
+                });
+            }
+
+            /**
+             * Initializes and animates a subtle particle network on a canvas.
+             */
+            function initializeParticleNetwork() {
+                const canvas = document.getElementById('particle-canvas');
+                const ctx = canvas.getContext('2d');
+                let particles = [];
+
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+
+                const particleCount = Math.min(Math.floor(window.innerWidth / 20), 80);
+
+                class Particle {
+                    constructor() {
+                        this.x = Math.random() * canvas.width;
+                        this.y = Math.random() * canvas.height;
+                        this.vx = Math.random() * 0.4 - 0.2;
+                        this.vy = Math.random() * 0.4 - 0.2;
+                        this.radius = 1.5;
+                    }
+                    update() {
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                    }
+                    draw() {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255, 193, 7, 0.7)';
+                        ctx.fill();
+                    }
+                }
+
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle());
+                }
+
+                function connectParticles() {
+                    for (let i = 0; i < particles.length; i++) {
+                        for (let j = i + 1; j < particles.length; j++) {
+                            const dx = particles[i].x - particles[j].x;
+                            const dy = particles[i].y - particles[j].y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+
+                            if (distance < 150) {
+                                ctx.beginPath();
+                                ctx.moveTo(particles[i].x, particles[i].y);
+                                ctx.lineTo(particles[j].x, particles[j].y);
+                                ctx.strokeStyle = `rgba(255, 193, 7, ${1 - distance / 150})`;
+                                ctx.lineWidth = 0.5;
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                }
+
+                function animateParticles() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(p => {
+                        p.update();
+                        p.draw();
+                    });
+                    connectParticles();
+                    requestAnimationFrame(animateParticles);
+                }
+                animateParticles();
+            }
+
+            /**
+             * Creates and animates confetti particles when the countdown finishes.
+             * Respects the 'prefers-reduced-motion' media query.
+             */
+            function launchConfetti() {
+                const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (reducedMotion) return;
+
+                const confettiContainer = document.getElementById('confetti-container');
+                const confettiCount = 150;
+                const colors = ['#ffc107', '#ff8c00', '#ffffff', '#ffeb3b'];
+
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'absolute';
+                    confetti.style.left = `${Math.random() * 100}vw`;
+                    confetti.style.top = `${Math.random() * -20}vh`;
+                    confetti.style.width = `${Math.random() * 10 + 5}px`;
+                    confetti.style.height = confetti.style.width;
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.opacity = '1';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    confetti.style.animation = `confetti-fall ${Math.random() * 3 + 4}s linear ${Math.random() * 2}s forwards`;
+                    
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '50%';
+                    }
+
+                    confettiContainer.appendChild(confetti);
+                }
+            }
+
+
+            // --- INITIALIZATION ---
+            tick(); // Start the countdown
+            initializeParallax();
+            initializeParticleNetwork();
+        });
+    </script>
+</body>
+</html>
